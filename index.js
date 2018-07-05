@@ -2,6 +2,15 @@ function htmlAttr(decl) {
   return decl.name[0].value + '="' + decl.value.toCSS() + '" ';
 }
 
+function styleProps(rules) {
+  var str = 'style="';
+  rules.forEach(function(decl) {
+    str += decl.name[0].value + ':' + decl.value.toCSS() + ';';
+  })
+  str += '" ';
+  return str;
+}
+
 var nodeStack = [];
 
 module.exports = {
@@ -26,9 +35,13 @@ module.exports = {
             str += htmlAttr(rule);
           } else {
             var sel = rule.selectors[0].toCSS().trim();
-            str += '><' + sel + ' ';
-            nodeStack.push(sel);
-            addRules(rule.rules);
+            if (sel === 'style') {
+              str += styleProps(rule.rules);
+            } else {
+              str += '><' + sel + ' ';
+              nodeStack.push(sel);
+              addRules(rule.rules);
+            }
           }
         });
         str += '></' + nodeStack.pop();
@@ -36,6 +49,7 @@ module.exports = {
 
       addRules(rules);
       str += '>';
+      
       var returner, index = arg.getIndex(), fileInfo = arg.fileInfo();
 
       returner = 'data:image/svg+xml,' + encodeURIComponent(str);
