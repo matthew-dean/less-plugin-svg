@@ -1,20 +1,26 @@
-function htmlAttr(decl) {
-  return decl.name[0].value + '="' + decl.value.toCSS() + '" ';
-}
-
-function styleProps(rules) {
-  var str = 'style="';
-  rules.forEach(function(decl) {
-    str += decl.name[0].value + ':' + decl.value.toCSS() + ';';
-  })
-  str += '" ';
-  return str;
-}
-
-var nodeStack = [];
-
 module.exports = {
   install: function(less, pluginManager, functions) {
+
+    function htmlAttr(decl) {
+      if (decl instanceof less.tree.Declaration) {
+        return decl.name[0].value + '="' + decl.value.toCSS() + '" ';
+      }
+      return ''
+    }
+    
+    function styleProps(rules) {
+      var str = 'style="';
+      rules.forEach(function(decl) {
+        if (decl instanceof less.tree.Declaration) {
+          str += decl.name[0].value + ':' + decl.value.toCSS() + ';';
+        }
+      })
+      str += '" ';
+      return str;
+    }
+    
+    var nodeStack = [];
+
     functions.add('svg', function(arg) {
       var rules;
       if (arg.ruleset) {
@@ -49,7 +55,8 @@ module.exports = {
 
       addRules(rules);
       str += '>';
-      
+
+      console.log(str);
       var returner, index = arg.getIndex(), fileInfo = arg.fileInfo();
 
       returner = 'data:image/svg+xml,' + encodeURIComponent(str);
